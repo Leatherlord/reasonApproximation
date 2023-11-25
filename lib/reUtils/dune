@@ -1,0 +1,4 @@
+(library
+ (name reUtils)
+ (flags
+  (:standard -w +A)))

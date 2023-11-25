@@ -1,0 +1,4 @@
+(library
+ (name reInt)
+ (flags
+  (:standard -w +A)))

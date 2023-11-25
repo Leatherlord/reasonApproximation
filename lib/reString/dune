@@ -1,0 +1,4 @@
+(library
+ (name reString)
+ (flags
+  (:standard -w +A)))

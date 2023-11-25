@@ -1,0 +1,5 @@
+(library
+ (name reApproximation)
+ (libraries owl reList reUtils)
+ (flags
+  (:standard -w +A-70)))

@@ -1,0 +1,5 @@
+_build/
+_opam/
+_esy/
+node_modules
+*.install

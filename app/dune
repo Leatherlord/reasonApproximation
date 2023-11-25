@@ -1,0 +1,6 @@
+(executable
+ (public_name app)
+ (name app)
+ (libraries reUtils reApproximation)
+ (flags
+  (:standard -w +A)))

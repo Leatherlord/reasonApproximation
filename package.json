@@ -1,0 +1,11 @@
+{
+  "esy": {
+    "build": "dune build -p reasonApproximation"
+  },
+  "dependencies": {
+    "@opam/dune": "*",
+    "@opam/owl": "1.1",
+    "@opam/reason": "3.10.0",
+    "ocaml": "4.14.1000"
+  }
+}
