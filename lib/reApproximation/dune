@@ -1,5 +1,5 @@
 (library
  (name reApproximation)
- (libraries owl reList reUtils)
+ (libraries owl reList reUtils reFloat)
  (flags
   (:standard -w +A-70)))

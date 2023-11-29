@@ -1,14 +1,9 @@
-// open ReUtils;
 open Owl;
-
-let hello = () => {
-  print_endline("Hello!");
-};
 
 let sumSomeLists = list => {
   let rec mulAux = (list, acc) => {
     switch (list) {
-    | [[hhd, ..._], ...tl] => mulAux(tl, Float.mul(acc, hhd))
+    | [[hhd, ..._], ...tl] => mulAux(tl, acc *. hhd)
     | _ => acc
     };
   };
@@ -23,8 +18,7 @@ let sumSomeLists = list => {
   let rec countAux = (list, acc) => {
     switch (list) {
     | [[], ..._] => acc
-    | [_, ..._] =>
-      Float.add(mulAux(list, 1.0), acc) |> countAux(cutAux(list))
+    | [_, ..._] => mulAux(list, 1.0) +. acc |> countAux(cutAux(list))
     | _ => acc
     };
   };
@@ -33,29 +27,27 @@ let sumSomeLists = list => {
 };
 
 let pearsonC = (xList, yList) => {
-  let xAvg =
-    xList |> List.length |> Float.of_int |> Float.div(sumSomeLists([xList]));
-  let yAvg =
-    yList |> List.length |> Float.of_int |> Float.div(sumSomeLists([yList]));
+  let xAvg = sumSomeLists([xList]) /. (xList |> List.length |> ReFloat.ofInt);
+  let yAvg = sumSomeLists([yList]) /. (yList |> List.length |> ReFloat.ofInt);
 
   let rec aux = (xList, yList, topSum, botSum1, botSum2) => {
     switch (xList, yList) {
     | ([xhd, ...xtl], [yhd, ...ytl]) =>
-      let xSub = Float.sub(xhd, xAvg);
-      let ySub = Float.sub(yhd, yAvg);
+      let xSub = xhd -. xAvg;
+      let ySub = yhd -. yAvg;
       aux(
         xtl,
         ytl,
-        Float.mul(xSub, ySub) |> Float.add(topSum),
-        Float.mul(xSub, xSub) |> Float.add(botSum1),
-        Float.mul(ySub, ySub) |> Float.add(botSum2),
+        xSub *. ySub +. topSum,
+        xSub *. xSub +. botSum1,
+        ySub *. ySub +. botSum2,
       );
     | (_, _) => (topSum, botSum1, botSum2)
     };
   };
 
   let (topSum, botSum1, botSum2) = aux(xList, yList, 0.0, 0.0, 0.0);
-  Float.sqrt(Float.mul(botSum1, botSum2)) |> Float.div(topSum);
+  topSum /. Float.sqrt(botSum1 *. botSum2);
 };
 
 let linearApproximation = (xList, yList) => {
@@ -63,16 +55,24 @@ let linearApproximation = (xList, yList) => {
   let sXX = sumSomeLists([xList, xList]);
   let sY = sumSomeLists([yList]);
   let sXY = sumSomeLists([xList, yList]);
-  let size = xList |> List.length |> Float.of_int;
+  let size = xList |> List.length |> ReFloat.ofInt;
 
-  let delta = Float.sub(Float.mul(sXX, size), Float.mul(sX, sX));
-  let delta1 = Float.sub(Float.mul(sXY, size), Float.mul(sX, sY));
-  let delta2 = Float.sub(Float.mul(sXX, sY), Float.mul(sX, sXY));
+  let delta = sXX *. size -. sX *. sX;
+  let delta1 = sXY *. size -. sX *. sY;
+  let delta2 = sXX *. sY -. sX *. sXY;
 
-  let a = Float.div(delta1, delta);
-  let b = Float.div(delta2, delta);
+  let a = delta1 /. delta;
+  let b = delta2 /. delta;
 
-  (a, b);
+  [a, b];
+};
+
+let linearCount = (params, x) => {
+  switch (params) {
+  | [a, b, ..._] => x *. a +. b
+  | [a] => x *. a
+  | [] => x
+  };
 };
 
 let squarePolinomialApproximation = (xList, yList) => {
@@ -83,7 +83,7 @@ let squarePolinomialApproximation = (xList, yList) => {
   let sY = sumSomeLists([yList]);
   let sXY = sumSomeLists([xList, yList]);
   let sX2Y = sumSomeLists([xList, xList, yList]);
-  let size = xList |> List.length |> Float.of_int;
+  let size = xList |> List.length |> ReFloat.ofInt;
 
   let lhs =
     Mat.of_array([|size, sX, sX2, sX, sX2, sX3, sX2, sX3, sX4|], 3, 3);
@@ -91,17 +91,35 @@ let squarePolinomialApproximation = (xList, yList) => {
 
   let solution = Linalg.D.linsolve(lhs, rhs);
 
-  (
+  [
     Owl_dense_matrix_d.get(solution, 2, 0),
-    Owl_dense_matrix_d.get(solution, 0, 0),
     Owl_dense_matrix_d.get(solution, 1, 0),
-  );
+    Owl_dense_matrix_d.get(solution, 0, 0),
+  ];
+};
+
+let squareCount = (params, x) => {
+  switch (params) {
+  | [a] => x *. x *. a
+  | [a, ...rest] => x *. x *. a +. linearCount(rest, x)
+  | [] => x *. x
+  };
 };
 
 let exponentialApproximation = (xList, yList) => {
   let yLogList = yList |> List.map(Float.log);
-  let (a, b) = linearApproximation(xList, yLogList);
-  (Float.exp(b), a);
+  switch (linearApproximation(xList, yLogList)) {
+  | [a, b, ..._] => [Float.exp(b), a]
+  | _ => [1., 0.]
+  };
+};
+
+let exponentialCount = (params, x) => {
+  switch (params) {
+  | [a, b, ..._] => (x *. b |> Float.exp) *. a
+  | [a] => (x |> Float.exp) *. a
+  | [] => x |> Float.exp
+  };
 };
 
 let logarithmicApproximation = (xList, yList) => {
@@ -109,9 +127,47 @@ let logarithmicApproximation = (xList, yList) => {
   linearApproximation(xLogList, yList);
 };
 
+let logarithmicCount = (params, x) => {
+  switch (params) {
+  | [a, b, ..._] => (x |> Float.log) *. a +. b
+  | [a] => (x |> Float.log) *. a
+  | [] => x |> Float.log
+  };
+};
+
 let powerFunctionApproximation = (xList, yList) => {
   let yLogList = yList |> List.map(Float.log);
   let xLogList = xList |> List.map(Float.log);
-  let (a, b) = linearApproximation(xLogList, yLogList);
-  (Float.exp(b), a);
+  switch (linearApproximation(xLogList, yLogList)) {
+  | [a, b] => [Float.exp(b), a]
+  | _ => [0., 0.]
+  };
+};
+
+let powerCount = (params, x) => {
+  switch (params) {
+  | [a, b, ..._] => (b |> Float.pow(x)) *. a
+  | [a] => x *. a
+  | [] => x
+  };
+};
+
+let applyApproximation =
+    (
+      approximation: (list(float), list(float)) => list(float),
+      counter: (list(float), float) => float,
+      xApprList,
+      yApprList,
+      xWantedList,
+    ) => {
+  let params = approximation(xApprList, yApprList);
+
+  let rec aux = (lst, acc) => {
+    switch (lst) {
+    | [hd, ...tl] => aux(tl, [(hd, counter(params, hd)), ...acc])
+    | [] => List.rev(acc)
+    };
+  };
+
+  aux(xWantedList, []);
 };

@@ -1,4 +1,4 @@
 (library
- (name reUtils)
+ (name reFloat)
  (flags
   (:standard -w +A-70)))

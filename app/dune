@@ -1,6 +1,6 @@
 (executable
  (public_name app)
  (name app)
- (libraries reUtils reApproximation)
+ (libraries reUtils reApproximation reString reList reFloat)
  (flags
   (:standard -w +A)))
