@@ -26,30 +26,6 @@ let sumSomeLists = list => {
   countAux(list, 0.0);
 };
 
-let pearsonC = (xList, yList) => {
-  let xAvg = sumSomeLists([xList]) /. (xList |> List.length |> ReFloat.ofInt);
-  let yAvg = sumSomeLists([yList]) /. (yList |> List.length |> ReFloat.ofInt);
-
-  let rec aux = (xList, yList, topSum, botSum1, botSum2) => {
-    switch (xList, yList) {
-    | ([xhd, ...xtl], [yhd, ...ytl]) =>
-      let xSub = xhd -. xAvg;
-      let ySub = yhd -. yAvg;
-      aux(
-        xtl,
-        ytl,
-        xSub *. ySub +. topSum,
-        xSub *. xSub +. botSum1,
-        ySub *. ySub +. botSum2,
-      );
-    | (_, _) => (topSum, botSum1, botSum2)
-    };
-  };
-
-  let (topSum, botSum1, botSum2) = aux(xList, yList, 0.0, 0.0, 0.0);
-  topSum /. Float.sqrt(botSum1 *. botSum2);
-};
-
 let linearApproximation = (xList, yList) => {
   let sX = sumSomeLists([xList]);
   let sXX = sumSomeLists([xList, xList]);
