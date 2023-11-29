@@ -234,18 +234,28 @@ Have a nice day!
 Результаты, переведенные в Desmos (сравнение алгоритмов с введенными значениями):
 
 - Линейная аппроксимация `(ax + b)`:
+
+
 ![image](https://github.com/Leatherlord/reasonApproximation/assets/70820064/53e294d1-4e53-47fc-8ae1-845487e0fa9d)
 
 - Квадратичный полином `(ax^2 + bx + c)`:
+
+
 ![image](https://github.com/Leatherlord/reasonApproximation/assets/70820064/1c3104c9-5269-4292-9455-811cfdde8ce2)
 
-- Експонента `(ae^(bx))`:
+- Экспонента `(ae^(bx))`:
+
+
 ![image](https://github.com/Leatherlord/reasonApproximation/assets/70820064/b18219d1-a35a-4cf7-be70-5d3d294e1ef8)
 
 - Логарифмическая функция `(aln(x) + b)`:
+
+
 ![image](https://github.com/Leatherlord/reasonApproximation/assets/70820064/517d1214-a550-420e-869f-144e35724a78)
 
 - Степенная функция `(ax^b)`:
+
+
 ![image](https://github.com/Leatherlord/reasonApproximation/assets/70820064/78db1408-903f-4704-93cd-f27d990b32e2)
 
 # Заключение
