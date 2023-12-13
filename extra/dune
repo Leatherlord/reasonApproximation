@@ -1,0 +1,6 @@
+(executable
+ (public_name extra)
+ (name extra)
+ (libraries reUtils reApproximation reString reList reFloat)
+ (flags
+  (:standard -w +A)))

@@ -258,6 +258,126 @@ Have a nice day!
 
 ![image](https://github.com/Leatherlord/reasonApproximation/assets/70820064/78db1408-903f-4704-93cd-f27d990b32e2)
 
+
+# Доп. задание
+
+В качестве дополнительного задания мной была реализована "игрушечная" реализация линейной интерполяции:
+
+```Reason
+let counter = (first, second, prev) => {
+  switch (first, second) {
+  | ([x0, y0], [x1, y1]) =>
+    let xList =
+      switch (prev) {
+      | ("", _) =>
+        generateXWanted(x0, x1, frequency^)
+        |> List.rev
+        |> (
+          (x1 -. x0)
+          /. frequency^
+          /. 2.
+          |> Float.round
+          |> ReFloat.toInt
+          |> takeWindowFromBack
+        )
+        |> List.rev
+      | (_, "") =>
+        generateXWanted(x0, x1, frequency^)
+        |> (
+          (x1 -. x0)
+          /. frequency^
+          /. 2.
+          |> Float.round
+          |> ReFloat.toInt
+          |> takeWindowFromBack
+        )
+      | (_, _) => [(x1 +. x0) /. 2.]
+      };
+    let transformer = linearInterpolation(x0, y0, x1, y1);
+    let results = xList |> List.map(transformer);
+    (xList, results);
+  | _ => ([], [])
+  };
+};
+
+let printer = (xList, yList) => {
+  let rec aux = (xList, yList) =>
+    switch (xList, yList) {
+    | ([x, ...xtl], [y, ...ytl]) =>
+      printString(
+        "("
+        ++ (Float.round(x *. 100.) /. 100. |> ReFloat.toString)
+        ++ ","
+        ++ (Float.round(y *. 100.) /. 100. |> ReFloat.toString)
+        ++ "),",
+      );
+      aux(xtl, ytl);
+    | _ => ()
+    };
+  aux(xList, yList);
+  printEndline("");
+};
+
+let rec parser = (acc, prev) => {
+  switch (acc) {
+  | [hd, ...tl] =>
+    switch (prev) {
+    | ("", "") => reader(tl, ("", hd))
+    | (_, pr) =>
+      let first =
+        pr |> ReString.splitOnChar(',') |> List.map(ReFloat.ofString);
+      let second =
+        hd |> ReString.splitOnChar(',') |> List.map(ReFloat.ofString);
+      let (xList, yList) = counter(first, second, prev);
+      printer(xList, yList);
+      reader(tl, (pr, hd));
+    }
+  | [] =>
+    let (f, s) = prev;
+    let first = f |> ReString.splitOnChar(',') |> List.map(ReFloat.ofString);
+    let second =
+      s |> ReString.splitOnChar(',') |> List.map(ReFloat.ofString);
+    let (xList, yList) = counter(first, second, (s, ""));
+    printer(xList, yList);
+    reader([], ("", ""));
+  };
+}
+and reader = (acc, prev) => {
+  switch (acc) {
+  | [_, ..._] => parser(acc, prev)
+  | [] =>
+    switch (maybeReadLine()) {
+    | Some(line) =>
+      let points = List.concat([acc, ReString.splitOnChar(';', line)]);
+      parser(points, prev);
+    | None =>
+      switch (prev) {
+      | ("", "") => printEndline("Have a good one!")
+      | _ => parser(acc, prev)
+      }
+    }
+  };
+};
+
+reader([], ("", ""));
+```
+
+Результаты ее работы:
+
+```
+selfofly@selfofly-with-oblepikha:~/Documents/FunctionalProgramming/reasonApproximation$ cat data | esy x extra
+
+(1.1,2.73),(1.2,2.93),(1.3,3.13),(1.4,3.33),(1.5,3.53),(1.6,3.73),
+(3.,6.43),
+(4.1,8.32),
+(4.95,9.75),
+(6.1,11.67),
+(7.15,13.09),
+(7.2,13.14),(7.3,13.24),(7.4,13.33),(7.5,13.43),
+Have a good one!
+
+```
+
 # Заключение
 
 При выполнении этой работы сразу чувствуется, что ты вышел из "зоны комфорта" - постоянно какие-то преобразования в строки, из строк, конкатенации и всякая лабудень. Классический набор детского парсера. И код сразу становится грязнее, когда наполняется такими вещами. Поэтому особое эстетическое удовольствие доставляет то, что работа с математикой полностью отделена от работы с вводом/выводом - в математическом модуле сохраняется чистота и опрятность хорошего функционального кода, и смотреть на него одно удовольствие. В целом, мне не очень понравилось, что язык плохо преспособлен для работы с вводом/выводом - как минимум нет нормального форматированного вывода в стандартной библиотеке. Хотя оно и понятно, ведь это грязная работа, которая в функциональных кругах не особо приветствуется.
